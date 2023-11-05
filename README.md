@@ -1,6 +1,6 @@
 # DerinCommander
 
-## A python library to send control commands to DerinPilot
+## A python library to send autonomous control commands to DerinPilot
 
 DerinCommander is a python library that allows you to send control commands to DerinPilot. It is designed to be used with the [DerinPilot](https://github.com/degzrobotics/DerinPilot) project.
 
