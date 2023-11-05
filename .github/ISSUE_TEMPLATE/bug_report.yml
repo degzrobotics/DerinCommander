@@ -1,0 +1,24 @@
+name: Bug Report
+description: Report a bug
+title: "(Bug report) "
+labels: "Type: Bug"
+body:
+- type: input
+  attributes:
+    label: What is your setup?
+    description: What is your setup? (e.g. which board, connection type, etc.)
+    placeholder: "Degz Suibo, Degz Sublink"
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Description
+    description: A clear and concise description of the bug and any additional information.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Error logs
+    description: Please provide error logs if available.
+  validations:
+    required: false
