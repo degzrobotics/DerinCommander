@@ -1,10 +1,10 @@
-﻿# DiveCommander Code of Conduct
+﻿# DerinCommander Code of Conduct
 
-DiveCommander aims to enable easiliy accessible and cheaper underwater vehicle systems for the peaceful benefit of all.
+DerinCommander aims to enable easiliy accessible and cheaper underwater vehicle systems for the peaceful benefit of all.
 
 ## Our Team
 
-The DiveCommander team is made up of a diverse group of individuals from all over the world. We are committed to creating a friendly and respectful place for learning, developing and contributing. All participants in our project and community are expected to show respect and courtesy to others.
+The DerinCommander team is made up of a diverse group of individuals from all over the world. We are committed to creating a friendly and respectful place for learning, developing and contributing. All participants in our project and community are expected to show respect and courtesy to others.
 
 ## Our Pledge
 
@@ -12,11 +12,11 @@ In the interest of fostering an open and welcoming environment, we as developers
 
 Endeavour to make participation in our project and our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
 Endeavour to understand the intent of development activities they undertake, where there may be reason to think that the vehicle may be used as a weapon or in an application where it is effectively in control of human life.
-DiveCommander is NOT certified for use in applications where DiveCommander is effectively in control of human lives. Members of the development team must not knowingly assist in projects where DiveCommander will be in control of human lives. “In control of human lives” includes but isn’t limited to manned aircraft.
+DerinCommander is NOT certified for use in applications where DerinCommander is effectively in control of human lives. Members of the development team must not knowingly assist in projects where DerinCommander will be in control of human lives. “In control of human lives” includes but isn’t limited to manned aircraft.
 
 ## Our Standards
 
-Examples of behavior that contributes to achieving the aims of DiveCommander include:
+Examples of behavior that contributes to achieving the aims of DerinCommander include:
 
 * Using welcoming and inclusive language
 * Being respectful of differing viewpoints and experiences

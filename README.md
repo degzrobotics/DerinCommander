@@ -1,8 +1,8 @@
-# DiveCommander
+# DerinCommander
 
 ## A python library to send control commands to DerinPilot
 
-DiveCommander is a python library that allows you to send control commands to DerinPilot. It is designed to be used with the [DerinPilot](https://github.com/degzrobotics/DerinPilot) project.
+DerinCommander is a python library that allows you to send control commands to DerinPilot. It is designed to be used with the [DerinPilot](https://github.com/degzrobotics/DerinPilot) project.
 
 ## Features
 
@@ -21,7 +21,7 @@ DiveCommander is a python library that allows you to send control commands to De
 ### Sending control commands
 
 ```python
-from divecommander import DiveCommander
+from DerinCommander import DerinCommander
 ```
 
 ## Dependencies
@@ -38,5 +38,5 @@ The more people contribute, the better the project will be. We are hoping we can
 
 ## License
 
-DiveCommander is licensed under the General Public License v3.0. See `COPYING.txt` for more information.
-[Full Text](https://github.com/degzrobotics/DiveCommander/blob/main/COPYING.txt)
+DerinCommander is licensed under the General Public License v3.0. See `COPYING.txt` for more information.
+[Full Text](https://github.com/degzrobotics/DerinCommander/blob/main/COPYING.txt)
