@@ -15,22 +15,17 @@
 
 from rov import *
 
-
-logging.basicConfig(level=logging.ERROR)
-
-def rovUpdate(commandData: CommandData, sensors: Sensors) -> Tuple[CommandData]:
+def rovUpdate(commandData: CommandData, receivedData: ReceivedData) -> Tuple[CommandData]:
     
     #print(commandData)
-    #print(sensors)
-    rov.arm()
-    rov.commandData.heading = 50
+    #print(receivedData)
+    rov.turnDegrees(-70)
+    rov.move(0,0,500)
     return commandData
-
 
 try:
     rov = Rov(port='COM10')
     rov.run(rovUpdate)
-    
 
 except:
     import traceback
@@ -38,3 +33,4 @@ except:
 
 finally:
     rov.close()
+

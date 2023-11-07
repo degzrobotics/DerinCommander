@@ -16,20 +16,19 @@
 from pySerialTransfer import pySerialTransfer as txfer
 
 
-class Sensors:
-    def __init__(self):
-        self.pitch = 0.0
-        self.roll = 0.0
-        self.yaw = 0.0
-        self.accelX = 0.0
-        self.accelY = 0.0
-        self.accelZ = 0.0
-        self.depth = 0.0
-        self.battV = 0.0
-        self.battA = 0.0
-        self.waterTemp = 0.0
-        self.internalTemp = 0.0
-        self.errCode = 0
+class ReceivedData:
+    pitch = 0
+    roll = 0
+    yaw = 0
+    accelX = 0
+    accelY = 0
+    accelZ = 0
+    depth = 0
+    battV = 0
+    battA = 0
+    waterTemp = 0
+    internalTemp = 0
+    errCode = 0
 
     def __str__(self) -> str:
         return f"Pitch: {self.pitch}, Roll: {self.roll}, Yaw: {self.yaw}, AccelX: {self.accelX}, AccelY: {self.accelY}, AccelZ: {self.accelZ}, Depth: {self.depth}, BattV: {self.battV}, BattA: {self.battA}, WaterTemp: {self.waterTemp}, InternalTemp: {self.internalTemp}, ErrCode: {self.errCode}"
@@ -61,36 +60,48 @@ def serialSend(link: txfer.SerialTransfer, commandData: CommandData):
     sendSize = link.tx_obj(commandData.buttons, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.linkCommand, start_pos=sendSize, val_type_override="H")
     
-    print(link.txBuff) 
-    
     link.send(sendSize)
 
 
-def serialReceive(link: txfer.SerialTransfer) -> Sensors:
+def serialReceive(link: txfer.SerialTransfer) -> ReceivedData:
     recSize = 0
-    sensors = Sensors()
-    sensors.pitch = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData = ReceivedData()
+    receivedData.pitch = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.roll = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.roll = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.yaw = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.yaw = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.accelX = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.accelX = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.accelY = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.accelY = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.accelZ = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.accelZ = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.depth = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.depth = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.battV = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.battV = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.battA = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.battA = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.waterTemp = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.waterTemp = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.internalTemp = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.internalTemp = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
-    sensors.errCode = link.rx_obj(obj_type='H', obj_byte_size=2, start_pos=recSize)
+    receivedData.errCode = link.rx_obj(obj_type='H', obj_byte_size=2, start_pos=recSize)
     
-    return sensors
+    return receivedData
+
+def sendArmCommand(link: txfer.SerialTransfer, armed: bool = True):
+    sendSize = 0
+
+    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(16 if armed else 2, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="H")
+    
+    link.send(sendSize)

@@ -13,16 +13,17 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from serial_transfer import *
+from serialLink import *
 import time
 import logging
 from typing import Optional, Union, Tuple
 
+logging.basicConfig(level=logging.ERROR)
 
 class Rov:
 
     def __init__(self, port: str, delay: Optional[float] = 0.03, baudRate: Optional[int] = 38400) -> None:
-        self.sensors = Sensors()
+        self.receivedData = ReceivedData()
         self.commandData = CommandData(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0)
         self.baudRate = baudRate
         self.delay = delay
@@ -30,13 +31,16 @@ class Rov:
 
         self.link = txfer.SerialTransfer(port, baud=baudRate)
         self.link.open()
+        
+        self.arm()
         time.sleep(2)
+        
 
     def run(self, rovUpdate=None):
         while True:
             if rovUpdate != None:
                     self.commandData = rovUpdate(
-                        self.commandData, self.sensors)
+                        self.commandData, self.receivedData)
             self.send()
             self.receive()
             time.sleep(self.delay)
@@ -46,8 +50,8 @@ class Rov:
 
     def receive(self):
         if self.link.available():
-            self.sensors = serialReceive(self.link)
-            logging.debug(self.sensors)
+            self.receivedData = serialReceive(self.link)
+            logging.debug(self.receivedData)
         elif self.link.status <= 0:
             logging.error('EROR: RS485_WIRE_PROBLEM')
             time.sleep(0.2)
@@ -69,7 +73,33 @@ class Rov:
             logging.error('Unable to close serial port')
 
     def arm(self):
-        self.commandData.buttons = 16
+        """Arms the ROV and sets the default heading and roll set point to current heading and roll.
+        It should only be called once. If its called continuously, the ROV will always updates its 
+        default set points.
+        """        
+        sendArmCommand(self.link,armed=True)
         
     def disArm(self):
-        self.commandData.buttons = 32
+        """Disarms the ROV.
+        """        
+        sendArmCommand(self.link,armed=False)
+        
+    def move(self, heave: float, strafe: float, surge:float):
+        """Move the ROV with the given values.
+
+        Args:
+            heave (float): Up and Down Movement, -500 to 500
+            strafe (float): Side to side Movement, -500 to 500
+            surge (float): Forward and Backward Movement, -500 to 500
+        """        
+        self.commandData.heave = heave
+        self.commandData.strafe = strafe
+        self.commandData.surge = surge
+        
+    def turnDegrees(self, degrees: float):
+        """Turns the ROV by the given degrees.
+
+        Args:
+            degrees (float): Degrees to turn, -180 to 180
+        """        
+        self.commandData.heading = self.receivedData.yaw + degrees
