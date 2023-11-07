@@ -14,72 +14,83 @@
 """
 
 from pySerialTransfer import pySerialTransfer as txfer
-from Controller import *
 
 
 class Sensors:
-    roll = 0
-    pitch = 0
-    yaw = 0
-    depth = 0
-    batteryVoltage = 0
-    systemCurrent = 0
-    waterTemp = 0
-    internalTemp = 0
+    def __init__(self):
+        self.pitch = 0.0
+        self.roll = 0.0
+        self.yaw = 0.0
+        self.accelX = 0.0
+        self.accelY = 0.0
+        self.accelZ = 0.0
+        self.depth = 0.0
+        self.battV = 0.0
+        self.battA = 0.0
+        self.waterTemp = 0.0
+        self.internalTemp = 0.0
+        self.errCode = 0
 
     def __str__(self) -> str:
-        return f"roll: {self.roll}, pitch: {self.pitch}, yaw: {self.yaw}, depth: {self.depth}, batteryVoltage: {self.batteryVoltage}, systemCurrent: {self.systemCurrent} waterTemp: {self.waterTemp}, internalTemp: {self.internalTemp}"
+        return f"Pitch: {self.pitch}, Roll: {self.roll}, Yaw: {self.yaw}, AccelX: {self.accelX}, AccelY: {self.accelY}, AccelZ: {self.accelZ}, Depth: {self.depth}, BattV: {self.battV}, BattA: {self.battA}, WaterTemp: {self.waterTemp}, InternalTemp: {self.internalTemp}, ErrCode: {self.errCode}"
 
 
-class ControllerData(object):
-    def __init__(self, buttons, leftTrigger, rightTrigger, leftThumbX, leftThumbY, rightThumbX, rightThumbY):
+class CommandData(object):
+    def __init__(self, heading, heave, strafe, surge, roliCamPitchControl, lightControl, buttons, linkCommand):
+        self.heading = heading
+        self.heave = heave
+        self.strafe = strafe
+        self.surge = surge
+        self.roliCamPitchControl = roliCamPitchControl
+        self.lightControl = lightControl
         self.buttons = buttons
-        self.leftTrigger = leftTrigger
-        self.rightTrigger = rightTrigger
-        self.leftThumbX = leftThumbX
-        self.leftThumbY = leftThumbY
-        self.rightThumbX = rightThumbX
-        self.rightThumbY = rightThumbY
+        self.linkCommand = linkCommand
 
+    def __str__(self) -> str:
+        return f"Heading: {self.heading}, Heave: {self.heave}, Strafe: {self.strafe}, Surge: {self.surge}, RoliCamPitchControl: {self.roliCamPitchControl}, LightControl: {self.lightControl}, Buttons: {self.buttons}, LinkCommand: {self.linkCommand}"
 
-def serialSend(link: txfer.SerialTransfer, controllerState: ControllerState, speedMultiplier: float):
+def serialSend(link: txfer.SerialTransfer, commandData: CommandData):
     sendSize = 0
-    controllerData = ControllerData(controllerState.buttons, int(controllerState.leftTrigger), int(controllerState.rightTrigger),
-                                    int(controllerState.leftThumbX * speedMultiplier), int(controllerState.leftThumbY * speedMultiplier), int(controllerState.rightThumbX * speedMultiplier), int(controllerState.rightThumbY * speedMultiplier))
-    sendSize = link.tx_obj(controllerData.buttons, start_pos=sendSize)
-    sendSize = link.tx_obj(
-        controllerData.leftTrigger, start_pos=sendSize)
-    sendSize = link.tx_obj(
-        controllerData.rightTrigger, start_pos=sendSize)
-    sendSize = link.tx_obj(
-        controllerData.leftThumbX, start_pos=sendSize)
-    sendSize = link.tx_obj(
-        controllerData.leftThumbY, start_pos=sendSize)
-    sendSize = link.tx_obj(
-        controllerData.rightThumbX, start_pos=sendSize)
-    sendSize = link.tx_obj(
-        controllerData.rightThumbY, start_pos=sendSize)
 
+    sendSize = link.tx_obj(commandData.heading, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.heave, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.strafe, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.surge, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.roliCamPitchControl, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.lightControl, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.buttons, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.linkCommand, start_pos=sendSize, val_type_override="H")
+    
+    print(link.txBuff) 
+    
     link.send(sendSize)
 
 
 def serialReceive(link: txfer.SerialTransfer) -> Sensors:
     recSize = 0
     sensors = Sensors()
-    sensors.roll = link.rx_obj(obj_type=type(
-        Sensors.roll), obj_byte_size=4, start_pos=recSize)
-    sensors.pitch = link.rx_obj(obj_type=type(
-        Sensors.pitch), obj_byte_size=4, start_pos=recSize + 4)
-    sensors.yaw = link.rx_obj(obj_type=type(
-        Sensors.yaw), obj_byte_size=4, start_pos=recSize + 8)
-    sensors.depth = link.rx_obj(obj_type=type(
-        Sensors.depth), obj_byte_size=4, start_pos=recSize + 12)
-    sensors.batteryVoltage = link.rx_obj(obj_type=type(
-        Sensors.batteryVoltage), obj_byte_size=4, start_pos=recSize + 16)
-    sensors.systemCurrent = link.rx_obj(obj_type=type(
-        Sensors.systemCurrent), obj_byte_size=4, start_pos=recSize + 20)
-    sensors.waterTemp = link.rx_obj(obj_type=type(
-        Sensors.waterTemp), obj_byte_size=4, start_pos=recSize + 24)
-    sensors.internalTemp = link.rx_obj(obj_type=type(
-        Sensors.internalTemp), obj_byte_size=4, start_pos=recSize + 28)
+    sensors.pitch = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.roll = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.yaw = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.accelX = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.accelY = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.accelZ = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.depth = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.battV = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.battA = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.waterTemp = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.internalTemp = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
+    sensors.errCode = link.rx_obj(obj_type='H', obj_byte_size=2, start_pos=recSize)
+    
     return sensors

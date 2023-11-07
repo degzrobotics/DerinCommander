@@ -14,8 +14,6 @@
 """
 
 from serial_transfer import *
-from Controller import *
-import cv2 as cv
 import time
 import logging
 from typing import Optional, Union, Tuple
@@ -23,54 +21,28 @@ from typing import Optional, Union, Tuple
 
 class Rov:
 
-    def __init__(self, port: str, cameraSource: Optional[Union[int, str]] = None, delay: Optional[float] = 0.03, baudRate: Optional[int] = 38400, cameraWidth: Optional[int] = None, cameraHeight: Optional[int] = None, speedMultiplier: Optional[float] = 1.0, useController: Optional[bool] = True) -> None:
-        self.cap = None
+    def __init__(self, port: str, delay: Optional[float] = 0.03, baudRate: Optional[int] = 38400) -> None:
         self.sensors = Sensors()
-        self.controller = Controller()
+        self.commandData = CommandData(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0)
         self.baudRate = baudRate
-        self.cameraSource = cameraSource
         self.delay = delay
         self.port = port
-        self.speedMultiplier = speedMultiplier
-        self.useController = useController
-        if not useController:
-            self.controller.isConnected = True
 
-        if cameraSource != None:
-            self.cap = cv.VideoCapture(cameraSource)
-            if not self.cap.isOpened():
-                self.cap = None
-                logging.critical("Cannot open camera")
-            elif cameraWidth != None and cameraHeight != None:
-                self.cap.set(cv.CAP_PROP_FRAME_WIDTH, cameraWidth)
-                self.cap.set(cv.CAP_PROP_FRAME_HEIGHT, cameraHeight)
         self.link = txfer.SerialTransfer(port, baud=baudRate)
         self.link.open()
         time.sleep(2)
 
-    def run(self, onFrame=None):
+    def run(self, rovUpdate=None):
         while True:
-            if self.useController:
-                self.controller.update()
-            if self.cap:
-                ret, frame = self.cap.read()
-                if not ret:
-                    logging.info(
-                        "Can't receive frame from camera. Exiting ...")
-                    break
-                if onFrame != None:
-                    frame, self.controller.state = onFrame(
-                        frame, self.controller.state, self.sensors)
-                cv.imshow('frame', frame)
-                if cv.waitKey(1) == ord('q'):
-                    break
-            if self.controller.isConnected:
-                self.send()
-                self.receive()
+            if rovUpdate != None:
+                    self.commandData = rovUpdate(
+                        self.commandData, self.sensors)
+            self.send()
+            self.receive()
             time.sleep(self.delay)
 
     def send(self):
-        serialSend(self.link, self.controller.state, self.speedMultiplier)
+        serialSend(self.link, self.commandData)
 
     def receive(self):
         if self.link.available():
@@ -90,13 +62,14 @@ class Rov:
                     logging.error('ERROR: {}'.format(self.link.status))
 
     def close(self):
-        if self.cap:
-            self.cap.release()
-            cv.destroyAllWindows()
-            logging.info('Camera is closed')
-
         try:
             self.link.close()
             logging.info('Serial port is closed')
         except:
             logging.error('Unable to close serial port')
+
+    def arm(self):
+        self.commandData.buttons = 16
+        
+    def disArm(self):
+        self.commandData.buttons = 32

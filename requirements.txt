@@ -1,4 +1,1 @@
-opencv-python
-numpy
 pySerialTransfer
-XInput-Python; sys_platform != 'darwin'

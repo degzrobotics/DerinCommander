@@ -13,25 +13,23 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import numpy as np
 from rov import *
-import cv2 as cv
 
 
+logging.basicConfig(level=logging.ERROR)
 
-logging.basicConfig(level=logging.DEBUG)
-
-def onFrame(frame: np.ndarray, controllerState: ControllerState, sensors: Sensors) -> Tuple[np.ndarray, ControllerState]:
+def rovUpdate(commandData: CommandData, sensors: Sensors) -> Tuple[CommandData]:
     
-    print(controllerState.buttons)
-    print(sensors)
-    
-    return frame, controllerState
+    #print(commandData)
+    #print(sensors)
+    rov.arm()
+    rov.commandData.heading = 50
+    return commandData
 
 
 try:
-    rov = Rov(port='COM5')
-    rov.run(onFrame)
+    rov = Rov(port='COM10')
+    rov.run(rovUpdate)
     
 
 except:
