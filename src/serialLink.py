@@ -17,6 +17,7 @@ from pySerialTransfer import pySerialTransfer as txfer
 
 
 class ReceivedData:
+    rovState = 0
     pitch = 0
     roll = 0
     yaw = 0
@@ -31,11 +32,12 @@ class ReceivedData:
     errCode = 0
 
     def __str__(self) -> str:
-        return f"Pitch: {self.pitch}, Roll: {self.roll}, Yaw: {self.yaw}, AccelX: {self.accelX}, AccelY: {self.accelY}, AccelZ: {self.accelZ}, Depth: {self.depth}, BattV: {self.battV}, BattA: {self.battA}, WaterTemp: {self.waterTemp}, InternalTemp: {self.internalTemp}, ErrCode: {self.errCode}"
+        return f"Rov State: {self.rovState}, Pitch: {self.pitch}, Roll: {self.roll}, Yaw: {self.yaw}, AccelX: {self.accelX}, AccelY: {self.accelY}, AccelZ: {self.accelZ}, Depth: {self.depth}, BattV: {self.battV}, BattA: {self.battA}, WaterTemp: {self.waterTemp}, InternalTemp: {self.internalTemp}, ErrCode: {self.errCode}"
 
 
 class CommandData(object):
-    def __init__(self, heading, heave, strafe, surge, roliCamPitchControl, lightControl, buttons, linkCommand):
+    def __init__(self, rovState, heading, heave, strafe, surge, roliCamPitchControl, lightControl, buttons, linkCommand):
+        self.rovState = rovState
         self.heading = heading
         self.heave = heave
         self.strafe = strafe
@@ -46,11 +48,11 @@ class CommandData(object):
         self.linkCommand = linkCommand
 
     def __str__(self) -> str:
-        return f"Heading: {self.heading}, Heave: {self.heave}, Strafe: {self.strafe}, Surge: {self.surge}, RoliCamPitchControl: {self.roliCamPitchControl}, LightControl: {self.lightControl}, Buttons: {self.buttons}, LinkCommand: {self.linkCommand}"
+        return f"Rov State : {self.rovState}, Heading: {self.heading}, Heave: {self.heave}, Strafe: {self.strafe}, Surge: {self.surge}, RoliCamPitchControl: {self.roliCamPitchControl}, LightControl: {self.lightControl}, Buttons: {self.buttons}, LinkCommand: {self.linkCommand}"
 
 def serialSend(link: txfer.SerialTransfer, commandData: CommandData):
     sendSize = 0
-
+    sendSize = link.tx_obj(commandData.rovState, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.heading, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.heave, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.strafe, start_pos=sendSize, val_type_override="f")
@@ -66,6 +68,8 @@ def serialSend(link: txfer.SerialTransfer, commandData: CommandData):
 def serialReceive(link: txfer.SerialTransfer) -> ReceivedData:
     recSize = 0
     receivedData = ReceivedData()
+    receivedData.rovState = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    recSize += 4
     receivedData.pitch = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
     receivedData.roll = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
@@ -94,7 +98,7 @@ def serialReceive(link: txfer.SerialTransfer) -> ReceivedData:
 
 def sendArmCommand(link: txfer.SerialTransfer, armed: bool = True):
     sendSize = 0
-
+    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
