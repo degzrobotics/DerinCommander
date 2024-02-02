@@ -19,6 +19,7 @@ def rovUpdate(commandData: CommandData, receivedData: ReceivedData) -> Tuple[Com
     
     #print(commandData)
     #print(receivedData)
+    rov.arm()
     rov.turnDegrees(-70)
     rov.move(0,0,500)
     return commandData
