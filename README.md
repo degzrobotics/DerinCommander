@@ -1,13 +1,13 @@
 # DerinCommander
 
-## A python library to send autonomous control commands to DerinPilot
+## A python library to send autonomous control commands to DerinDiver
 
-DerinCommander is a python library that allows you to send control commands to DerinPilot. It is designed to be used with the [DerinPilot](https://github.com/degzrobotics/DerinPilot) project.
+DerinCommander is a python library that allows you to send control commands to DerinDiver. It is designed to be used with the [DerinDiver](https://github.com/degzrobotics/DerinDiver) project.
 
 ## Features
 
-* Send control commands to DerinPilot via serial port
-* Get sensor data from DerinPilot
+* Send control commands to DerinDiver via serial port
+* Get sensor data from DerinDiver
 * Get the camera feed and easily use it with OpenCV
 
 ## Installation
