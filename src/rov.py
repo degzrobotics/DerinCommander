@@ -24,7 +24,7 @@ class Rov:
 
     def __init__(self, port: str, delay: Optional[float] = 0.03, baudRate: Optional[int] = 38400) -> None:
         self.receivedData = ReceivedData()
-        self.commandData = CommandData(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0)
+        self.commandData = CommandData(0, 0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0)
         self.baudRate = baudRate
         self.delay = delay
         self.port = port
@@ -39,8 +39,7 @@ class Rov:
     def run(self, rovUpdate=None):
         while True:
             if rovUpdate != None:
-                    self.commandData = rovUpdate(
-                        self.commandData, self.receivedData)
+                self.commandData = rovUpdate(self.commandData, self.receivedData)
             self.send()
             self.receive()
             time.sleep(self.delay)
@@ -77,12 +76,12 @@ class Rov:
         It should only be called once. If its called continuously, the ROV will always updates its 
         default set points.
         """        
-        sendArmCommand(self.link,armed=True)
+        sendArmCommand(self.link,armed=True, commandData=self.commandData, receivedData=self.receivedData)
         
     def disArm(self):
         """Disarms the ROV.
         """        
-        sendArmCommand(self.link,armed=False)
+        sendArmCommand(self.link, armed=False, commandData=self.commandData, receivedData=self.receivedData)
         
     def move(self, heave: float, strafe: float, surge:float):
         """Move the ROV with the given values.
@@ -95,7 +94,15 @@ class Rov:
         self.commandData.heave = heave
         self.commandData.strafe = strafe
         self.commandData.surge = surge
-        
+
+    def turn(self, degrees: float):
+        """Turns the ROV to the given degree.
+
+        Args:
+            degrees (float): Degrees to turn, -180 to 180
+        """        
+        self.commandData.heading = degrees
+
     def turnDegrees(self, degrees: float):
         """Turns the ROV by the given degrees.
 
