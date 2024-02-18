@@ -52,7 +52,7 @@ class CommandData(object):
 
 def serialSend(link: txfer.SerialTransfer, commandData: CommandData):
     sendSize = 0
-    sendSize = link.tx_obj(commandData.rovState, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.rovState, start_pos=sendSize, val_type_override="i")
     sendSize = link.tx_obj(commandData.heading, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.heave, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.strafe, start_pos=sendSize, val_type_override="f")
@@ -96,16 +96,15 @@ def serialReceive(link: txfer.SerialTransfer) -> ReceivedData:
     
     return receivedData
 
-def sendArmCommand(link: txfer.SerialTransfer, armed: bool = True):
-    sendSize = 0
-    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
-    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
-    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
-    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
-    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
-    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
-    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="f")
+def sendArmCommand(link: txfer.SerialTransfer, armed: bool = True, commandData: CommandData = None, receivedData: ReceivedData = None):
+    sendSize = 0    
+    sendSize = link.tx_obj(commandData.rovState, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(receivedData.yaw, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.heave, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.strafe, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.surge, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.roliCamPitchControl, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.lightControl, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(16 if armed else 2, start_pos=sendSize, val_type_override="f")
-    sendSize = link.tx_obj(0, start_pos=sendSize, val_type_override="H")
-    
+    sendSize = link.tx_obj(commandData.linkCommand, start_pos=sendSize, val_type_override="H")
     link.send(sendSize)
