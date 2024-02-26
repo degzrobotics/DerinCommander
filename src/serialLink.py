@@ -50,10 +50,10 @@ class CommandData(object):
     def __str__(self) -> str:
         return f"Rov State : {self.rovState}, Heading: {self.heading}, Heave: {self.heave}, Strafe: {self.strafe}, Surge: {self.surge}, RoliCamPitchControl: {self.roliCamPitchControl}, LightControl: {self.lightControl}, Buttons: {self.buttons}, LinkCommand: {self.linkCommand}"
 
-def serialSend(link: txfer.SerialTransfer, commandData: CommandData):
+def serialSend(link: txfer.SerialTransfer, commandData: CommandData, yawSetPoint:float ):
     sendSize = 0
     sendSize = link.tx_obj(commandData.rovState, start_pos=sendSize, val_type_override="i")
-    sendSize = link.tx_obj(commandData.heading, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(yawSetPoint, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.heave, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.strafe, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.surge, start_pos=sendSize, val_type_override="f")
@@ -98,7 +98,7 @@ def serialReceive(link: txfer.SerialTransfer) -> ReceivedData:
 
 def sendArmCommand(link: txfer.SerialTransfer, armed: bool = True, commandData: CommandData = None, receivedData: ReceivedData = None):
     sendSize = 0    
-    sendSize = link.tx_obj(commandData.rovState, start_pos=sendSize, val_type_override="f")
+    sendSize = link.tx_obj(commandData.rovState, start_pos=sendSize, val_type_override="i")
     sendSize = link.tx_obj(receivedData.yaw, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.heave, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.strafe, start_pos=sendSize, val_type_override="f")

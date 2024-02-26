@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.ERROR)
 
 class Rov:
 
-    def __init__(self, port: str, delay: Optional[float] = 0.03, baudRate: Optional[int] = 38400) -> None:
+    def __init__(self, port: str, delay: Optional[float] = 0.3, baudRate: Optional[int] = 38400) -> None:
         self.receivedData = ReceivedData()
         self.commandData = CommandData(0, 0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0)
         self.baudRate = baudRate
@@ -31,21 +31,30 @@ class Rov:
 
         self.link = txfer.SerialTransfer(port, baud=baudRate)
         self.link.open()
-        
+        self.yaw_set_point = 0.0
         self.arm()
+        self.timer1 = 0.0
+        self.bitti = True
+
         time.sleep(2)
         
 
     def run(self, rovUpdate=None):
-        while True:
+        while True :
             if rovUpdate != None:
                 self.commandData = rovUpdate(self.commandData, self.receivedData)
-            self.send()
-            self.receive()
-            time.sleep(self.delay)
+            self.timer2 = time.time()  * 1000
+            if self.timer2 - self.timer1 > 90 : 
+                self.send()
+                self.receive()
+                if self.bitti == True:
+                    self.yaw_set_point = self.receivedData.yaw # after armed
+                    # print(self.yaw_set_point)
+                    self.bitti = False
+                self.timer1 = self.timer2
 
     def send(self):
-        serialSend(self.link, self.commandData)
+        serialSend(self.link, self.commandData, self.yaw_set_point)
 
     def receive(self):
         if self.link.available():
@@ -80,7 +89,7 @@ class Rov:
         
     def disArm(self):
         """Disarms the ROV.
-        """        
+        """
         sendArmCommand(self.link, armed=False, commandData=self.commandData, receivedData=self.receivedData)
         
     def move(self, heave: float, strafe: float, surge:float):
@@ -90,7 +99,7 @@ class Rov:
             heave (float): Up and Down Movement, -500 to 500
             strafe (float): Side to side Movement, -500 to 500
             surge (float): Forward and Backward Movement, -500 to 500
-        """        
+        """
         self.commandData.heave = heave
         self.commandData.strafe = strafe
         self.commandData.surge = surge
@@ -100,13 +109,14 @@ class Rov:
 
         Args:
             degrees (float): Degrees to turn, -180 to 180
-        """        
-        self.commandData.heading = degrees
+        """
+        self.yaw_set_point = self.receivedData.yaw + degrees
+        # print("self.commandData.heading", self.commandData.heading)
 
     def turnDegrees(self, degrees: float):
         """Turns the ROV by the given degrees.
 
         Args:
             degrees (float): Degrees to turn, -180 to 180
-        """        
+        """
         self.commandData.heading = self.receivedData.yaw + degrees
