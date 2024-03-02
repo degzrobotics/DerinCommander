@@ -26,6 +26,7 @@ def rovUpdate(commandData: CommandData, receivedData: ReceivedData) -> Tuple[Com
 
 try:
     rov = Rov(port='COM10')
+    rov.timer1 = time.time() * 1000
     rov.run(rovUpdate)
 
 except:
