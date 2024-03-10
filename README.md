@@ -20,16 +20,11 @@ DerinCommander is a python library that allows you to send control commands to D
 
 ### Sending control commands
 
-```python
-from DerinCommander import DerinCommander
-```
+to be added
 
 ## Dependencies
 
-* opencv-python
-* numpy
 * pySerialTransfer
-* XInput-Python
 
 ## How to contribute
 
