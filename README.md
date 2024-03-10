@@ -1,4 +1,4 @@
-# DerinCommander
+# Derin Commander
 
 ## A python library to send autonomous control commands to DerinDiver
 
