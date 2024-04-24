@@ -24,7 +24,7 @@ class Rov:
 
     def __init__(self, port: str, delay: Optional[float] = 0.3, baudRate: Optional[int] = 38400) -> None:
         self.receivedData = ReceivedData()
-        self.commandData = CommandData(0, 0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0)
+        self.commandData = CommandData(0, 0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0, 0.0, 0.0, 0)
         self.baudRate = baudRate
         self.delay = delay
         self.port = port
@@ -32,6 +32,7 @@ class Rov:
         self.link = txfer.SerialTransfer(port, baud=baudRate)
         self.link.open()
         self.yaw_set_point = 0.0
+        self.roll_set_point = 0.0
         self.arm()
         self.timer1 = 0.0
         self.bitti = True
@@ -49,6 +50,7 @@ class Rov:
                 self.receive()
                 if self.bitti == True:
                     self.yaw_set_point = self.receivedData.yaw # after armed
+                    self.roll_set_point = self.receivedData.roll # after armed
                     # print(self.yaw_set_point)
                     self.bitti = False
                 self.timer1 = self.timer2
@@ -92,7 +94,7 @@ class Rov:
         """
         sendArmCommand(self.link, armed=False, commandData=self.commandData, receivedData=self.receivedData)
         
-    def move(self, heave: float, strafe: float, surge:float):
+    def move(self, heave: float, strafe: float, surge:float, roll: float, pitch: float):
         """Move the ROV with the given values.
 
         Args:
@@ -103,6 +105,8 @@ class Rov:
         self.commandData.heave = heave
         self.commandData.strafe = strafe
         self.commandData.surge = surge
+        self.commandData.roll = roll
+        self.commandData.pitch = pitch
 
     def turn(self, degrees: float):
         """Turns the ROV to the given degree.
