@@ -48,7 +48,7 @@ class Rov:
             if self.timer2 - self.timer1 > 90 : 
                 self.send()
                 self.receive()
-                if self.bitti == True:
+                if self.bitti == True and self.receivedData.rovState == 2 or self.receivedData.rovState == 3:
                     self.yaw_set_point = self.receivedData.yaw # after armed
                     self.roll_set_point = self.receivedData.roll # after armed
                     # print(self.yaw_set_point)

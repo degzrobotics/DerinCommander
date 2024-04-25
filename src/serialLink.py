@@ -72,7 +72,7 @@ def serialSend(link: txfer.SerialTransfer, commandData: CommandData, yawSetPoint
 def serialReceive(link: txfer.SerialTransfer) -> ReceivedData:
     recSize = 0
     receivedData = ReceivedData()
-    receivedData.rovState = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
+    receivedData.rovState = link.rx_obj(obj_type=int, obj_byte_size=4, start_pos=recSize)
     recSize += 4
     receivedData.pitch = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
