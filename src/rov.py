@@ -24,7 +24,7 @@ class Rov:
 
     def __init__(self, port: str, delay: Optional[float] = 0.3, baudRate: Optional[int] = 38400) -> None:
         self.receivedData = ReceivedData()
-        self.commandData = CommandData(0, 0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0)
+        self.commandData = CommandData(2, 0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0)
         self.baudRate = baudRate
         self.delay = delay
         self.port = port
