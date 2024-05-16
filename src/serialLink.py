@@ -12,9 +12,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-
 from pySerialTransfer import pySerialTransfer as txfer
-
 
 class ReceivedData:
     rovState = 0
@@ -34,8 +32,7 @@ class ReceivedData:
     def __str__(self) -> str:
         return f"Rov State: {self.rovState}, Pitch: {self.pitch}, Roll: {self.roll}, Yaw: {self.yaw}, AccelX: {self.accelX}, AccelY: {self.accelY}, AccelZ: {self.accelZ}, Depth: {self.depth}, BattV: {self.battV}, BattA: {self.battA}, WaterTemp: {self.waterTemp}, InternalTemp: {self.internalTemp}, ErrCode: {self.errCode}"
 
-
-class CommandData(object):
+class CommandData:
     def __init__(self, rovState, heading, heave, strafe, surge, roll, pitch, roliCamPitchControl, lightControl, buttons, linkCommand):
         self.rovState = rovState
         self.heading = heading
@@ -50,9 +47,9 @@ class CommandData(object):
         self.linkCommand = linkCommand
 
     def __str__(self) -> str:
-        return f"Rov State : {self.rovState}, Heading: {self.heading}, Heave: {self.heave}, Strafe: {self.strafe}, Surge: {self.surge}, Roll: {self.roll}, Pitch: {self.pitch}, RoliCamPitchControl: {self.roliCamPitchControl}, LightControl: {self.lightControl}, Buttons: {self.buttons}, LinkCommand: {self.linkCommand}"
+        return f"Rov State: {self.rovState}, Heading: {self.heading}, Heave: {self.heave}, Strafe: {self.strafe}, Surge: {self.surge}, Roll: {self.roll}, Pitch: {self.pitch}, RoliCamPitchControl: {self.roliCamPitchControl}, LightControl: {self.lightControl}, Buttons: {self.buttons}, LinkCommand: {self.linkCommand}"
 
-def serialSend(link: txfer.SerialTransfer, commandData: CommandData, yawSetPoint:float ):
+def serialSend(link: txfer.SerialTransfer, commandData: CommandData, yawSetPoint: float):
     sendSize = 0
     sendSize = link.tx_obj(commandData.rovState, start_pos=sendSize, val_type_override="i")
     sendSize = link.tx_obj(yawSetPoint, start_pos=sendSize, val_type_override="f")
@@ -68,8 +65,8 @@ def serialSend(link: txfer.SerialTransfer, commandData: CommandData, yawSetPoint
     
     link.send(sendSize)
 
-
 def serialReceive(link: txfer.SerialTransfer) -> ReceivedData:
+    print("Receiving")
     recSize = 0
     receivedData = ReceivedData()
     receivedData.rovState = link.rx_obj(obj_type=int, obj_byte_size=4, start_pos=recSize)
@@ -97,7 +94,7 @@ def serialReceive(link: txfer.SerialTransfer) -> ReceivedData:
     receivedData.internalTemp = link.rx_obj(obj_type=float, obj_byte_size=4, start_pos=recSize)
     recSize += 4
     receivedData.errCode = link.rx_obj(obj_type='H', obj_byte_size=2, start_pos=recSize)
-    
+    print("Received")
     return receivedData
 
 def sendArmCommand(link: txfer.SerialTransfer, armed: bool = True, commandData: CommandData = None, receivedData: ReceivedData = None):
@@ -114,3 +111,7 @@ def sendArmCommand(link: txfer.SerialTransfer, armed: bool = True, commandData: 
     sendSize = link.tx_obj(16 if armed else 2, start_pos=sendSize, val_type_override="f")
     sendSize = link.tx_obj(commandData.linkCommand, start_pos=sendSize, val_type_override="H")
     link.send(sendSize)
+    
+def clear_buffers(link: txfer.SerialTransfer):
+    link.connection.reset_input_buffer()
+    link.connection.reset_output_buffer()

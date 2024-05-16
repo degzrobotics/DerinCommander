@@ -12,75 +12,69 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-
 from serialLink import *
 import time
+import threading
 import logging
-from typing import Optional, Union, Tuple
+from typing import Optional
 
 logging.basicConfig(level=logging.ERROR)
 
 class Rov:
-
-    def __init__(self, port: str, delay: Optional[float] = 0.3, baudRate: Optional[int] = 38400) -> None:
+    def __init__(self, port: str, rate_hz: Optional[int] = 28, baudRate: Optional[int] = 38400) -> None:
         self.receivedData = ReceivedData()
-        self.commandData = CommandData(0, 0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0 ,0.0, 0.0, 0.0, 0)
+        self.commandData = CommandData(2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0)
         self.baudRate = baudRate
-        self.delay = delay
+        self.rate_hz = rate_hz
         self.port = port
-
+        self.callback_list = [ self.receive ]
         self.link = txfer.SerialTransfer(port, baud=baudRate)
         self.link.open()
+        self.link.set_callbacks(self.callback_list)
+        clear_buffers(self.link)
         self.yaw_set_point = 0.0
         self.roll_set_point = 0.0
         self.arm()
-        self.timer1 = 0.0
-        self.bitti = True
 
-        time.sleep(2)
-        
+        self.interval = 1.0 / rate_hz  # Interval in seconds
+        self.is_running = True
+
+        # Start a separate thread for receiving data
+        self.receive_thread = threading.Thread(target=self.receive_loop)
+        self.receive_thread.daemon = True
+        self.receive_thread.start()
 
     def run(self, rovUpdate=None):
-        while True :
-            if rovUpdate != None:
-                self.commandData = rovUpdate(self.commandData, self.receivedData)
-            self.timer2 = time.time()  * 1000
-            if self.timer2 - self.timer1 > 90 : 
+        next_time = time.monotonic() + self.interval
+        while self.is_running:
+            current_time = time.monotonic()
+            if current_time >= next_time:
+                if rovUpdate is not None:
+                    self.commandData = rovUpdate(self.commandData, self.receivedData)
                 self.send()
-                self.receive()
-                if self.bitti == True and self.receivedData.rovState == 2 or self.receivedData.rovState == 3:
-                    self.yaw_set_point = self.receivedData.yaw # after armed
-                    self.roll_set_point = self.receivedData.roll # after armed
-                    # print(self.yaw_set_point)
-                    self.bitti = False
-                self.timer1 = self.timer2
+                next_time += self.interval
+                if next_time <= current_time:
+                    next_time = current_time + self.interval
 
     def send(self):
         serialSend(self.link, self.commandData, self.yaw_set_point)
 
-    def receive(self):
-        if self.link.available():
-            self.receivedData = serialReceive(self.link)
-            logging.debug(self.receivedData)
-        elif self.link.status <= 0:
-            logging.error('EROR: RS485_WIRE_PROBLEM')
-            time.sleep(0.2)
-            if self.link.status <= 0:
-                if self.link.status == txfer.CRC_ERROR:
-                    logging.error('ERROR: CRC_ERROR')
-                elif self.link.status == txfer.PAYLOAD_ERROR:
-                    logging.error('ERROR: PAYLOAD_ERROR')
-                elif self.link.status == txfer.STOP_BYTE_ERROR:
-                    logging.error('ERROR: STOP_BYTE_ERROR')
-                else:
-                    logging.error('ERROR: {}'.format(self.link.status))
+    def receive_loop(self):
+        while self.is_running:
+            self.link.tick()
+            time.sleep(0.01)
 
+    def receive(self):
+        self.receivedData = serialReceive(self.link)
+        
     def close(self):
+        self.is_running = False
         try:
+            self.receive_thread.join()
             self.link.close()
             logging.info('Serial port is closed')
-        except:
-            logging.error('Unable to close serial port')
+        except Exception as e:
+            logging.error(f'Unable to close serial port: {e}')
 
     def arm(self):
         """Arms the ROV and sets the default heading and roll set point to current heading and roll.
