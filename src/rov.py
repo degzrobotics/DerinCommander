@@ -104,15 +104,15 @@ class Rov:
         """Turns the ROV to the given degree.
 
         Args:
-            degrees (float): Degrees to turn, -180 to 180
+            degrees (float): Degrees to turn
         """
-        self.yaw_set_point = self.receivedData.yaw + degrees
+        self.yaw_set_point = degrees
         # print("self.commandData.heading", self.commandData.heading)
 
     def turnDegrees(self, degrees: float):
         """Turns the ROV by the given degrees.
 
         Args:
-            degrees (float): Degrees to turn, -180 to 180
+            degrees (float): Degrees to turn
         """
-        self.commandData.heading = self.receivedData.yaw + degrees
+        self.yaw_set_point = self.receivedData.yaw + degrees
