@@ -27,7 +27,8 @@ def rovUpdate(commandData: CommandData, receivedData: ReceivedData) -> CommandDa
     print(receivedData)
     #print(commandData)
     rov.turnDegrees(-70)
-    rov.move(0, 0, 500, 0, 0)
+    rov.move(0, 0, 500)
+    
     return commandData
 
 try:

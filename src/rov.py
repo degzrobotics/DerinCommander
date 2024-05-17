@@ -88,7 +88,7 @@ class Rov:
         """
         sendArmCommand(self.link, armed=False, commandData=self.commandData, receivedData=self.receivedData)
         
-    def move(self, heave: float, strafe: float, surge:float, roll: float, pitch: float):
+    def move(self, heave: float, strafe: float, surge:float):
         """Move the ROV with the given values.
 
         Args:
@@ -99,8 +99,6 @@ class Rov:
         self.commandData.heave = heave
         self.commandData.strafe = strafe
         self.commandData.surge = surge
-        self.commandData.roll = roll
-        self.commandData.pitch = pitch
 
     def turn(self, degrees: float):
         """Turns the ROV to the given degree.
